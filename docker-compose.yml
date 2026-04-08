@@ -1,0 +1,29 @@
+services:
+#   frontend:
+#     build:
+#       context: ./frontend
+#       dockerfile: Dockerfile
+#     ports:
+#       - "5173:5173"
+#     volumes:
+#       # Sharing the entire folder including node_modules for live-sync
+#       - ./frontend:/app
+#     environment:
+#       - VITE_PB_URL=http://pocketbase:8090
+#     depends_on:
+#       - pocketbase
+
+#   pocketbase:
+#     image: alpine:latest
+#     ports:
+#       - "8090:8090"
+#     volumes:
+#       - ./pb_data:/pb_data
+#       - ./pb_public:/pb_public
+#     entrypoint: /bin/sh -c "apk add --no-cache ca-certificates && \
+#       if [ ! -f /usr/local/bin/pocketbase ]; then \
+#         wget -q https://github.com/pocketbase/pocketbase/releases/download/v0.22.4/pocketbase_0.22.4_linux_amd64.zip -O /tmp/pb.zip && \
+#         unzip /tmp/pb.zip -d /usr/local/bin/ && \
+#         rm /tmp/pb.zip; \
+#       fi && \
+#       pocketbase serve --http=0.0.0.0:8090 --dir=/pb_data --publicDir=/pb_public"

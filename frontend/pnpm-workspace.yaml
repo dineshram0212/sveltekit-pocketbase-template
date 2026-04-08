@@ -1,0 +1,6 @@
+ignoredBuiltDependencies:
+  - '@hugeicons/svelte'
+
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - esbuild

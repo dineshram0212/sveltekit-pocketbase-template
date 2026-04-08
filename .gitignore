@@ -1,0 +1,27 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# PocketBase
+pocketbase/pb_data
+pocketbase/pocketbase
+pocketbase/pocketbase.exe
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+.pnpm-store/
+frontend/.pnpm-store/
+
+# SvelteKit
+frontend/.svelte-kit/
+frontend/build/
+pnpm-lock.yaml
+frontend/pnpm-lock.yaml
+package-lock.json
+frontend/package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db

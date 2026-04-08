@@ -1,0 +1,94 @@
+<script lang="ts">
+	import { HugeiconsIcon } from "@hugeicons/svelte";
+	import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "@hugeicons/core-free-icons";
+	import { authClient } from "$lib/utils/auth";
+	import * as Avatar from "$lib/components/ui/avatar/index.js";
+	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
+	
+	import { goto } from "$app/navigation";
+	
+	let { user }: { user: { name: string; email: string; avatar?: string } } = $props();
+	const sidebar = useSidebar();
+
+	async function logout() {
+		await authClient.signOut();
+		goto("/login");
+	}
+</script>
+
+<Sidebar.Menu>
+	<Sidebar.MenuItem>
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger>
+				{#snippet child({ props })}
+					<Sidebar.MenuButton
+						size="lg"
+						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+						{...props}
+					>
+						<Avatar.Root class="size-8 rounded-lg">
+							<Avatar.Image src={user.avatar} alt={user.name} />
+							<Avatar.Fallback class="rounded-lg">
+								{user.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "UN"}
+							</Avatar.Fallback>
+						</Avatar.Root>
+						<div class="grid flex-1 text-start text-sm leading-tight">
+							<span class="truncate font-medium">{user.name}</span>
+							<span class="truncate text-xs">{user.email}</span>
+						</div>
+					</Sidebar.MenuButton>
+				{/snippet}
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content
+				class="w-(--bits-dropdown-menu-anchor-width) min-w-56"
+				side={sidebar.isMobile ? "bottom" : "right"}
+				align="end"
+				sideOffset={4}
+			>
+				<DropdownMenu.Label class="p-0 font-normal">
+					<div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
+						<Avatar.Root class="size-8">
+							<Avatar.Image src={user.avatar} alt={user.name} />
+							<Avatar.Fallback class="rounded-lg">
+								{user.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "UN"}
+							</Avatar.Fallback>
+						</Avatar.Root>
+						<div class="grid flex-1 text-start text-sm leading-tight">
+							<span class="truncate font-medium">{user.name}</span>
+							<span class="truncate text-xs">{user.email}</span>
+						</div>
+					</div>
+				</DropdownMenu.Label>
+				<DropdownMenu.Separator />
+				<DropdownMenu.Group>
+					<DropdownMenu.Item>
+						<HugeiconsIcon icon={Sparkles} />
+						Upgrade to Pro
+					</DropdownMenu.Item>
+				</DropdownMenu.Group>
+				<DropdownMenu.Separator />
+				<DropdownMenu.Group>
+					<DropdownMenu.Item>
+						<HugeiconsIcon icon={BadgeCheck} />
+						Account
+					</DropdownMenu.Item>
+					<DropdownMenu.Item>
+						<HugeiconsIcon icon={CreditCard} />
+						Billing
+					</DropdownMenu.Item>
+					<DropdownMenu.Item>
+						<HugeiconsIcon icon={Bell} />
+						Notifications
+					</DropdownMenu.Item>
+				</DropdownMenu.Group>
+				<DropdownMenu.Separator />
+				<DropdownMenu.Item onclick={logout}>
+					<HugeiconsIcon icon={LogOut} />
+					Log out
+				</DropdownMenu.Item>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+	</Sidebar.MenuItem>
+</Sidebar.Menu>
