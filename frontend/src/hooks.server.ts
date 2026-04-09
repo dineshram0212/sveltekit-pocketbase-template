@@ -42,6 +42,8 @@ export const handleError: HandleServerError = async ({ error, event }) => {
 
     if (pb) {
         try {
+            // Only attempt to log if we're not already in an error loop
+            // and maybe check if the collection exists (though that's an extra hop)
             await pb.collection('system_logs').create({
                 errorId,
                 message: error instanceof Error ? error.message : String(error),
@@ -52,8 +54,11 @@ export const handleError: HandleServerError = async ({ error, event }) => {
                 type: 'server_error',
                 timestamp: new Date().toISOString(),
             });
-        } catch (e) {
-            console.error('Failed to log server error to PocketBase:', e);
+        } catch (e: any) {
+            // Silently fail or log a simpler message if the logging collection doesn't exist
+            if (e.status !== 404) {
+                console.error('Failed to log server error to PocketBase:', e.message);
+            }
         }
     }
 

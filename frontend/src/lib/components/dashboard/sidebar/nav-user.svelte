@@ -1,15 +1,23 @@
 <script lang="ts">
 	import { HugeiconsIcon } from "@hugeicons/svelte";
-	import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "@hugeicons/core-free-icons";
+	import {
+		BadgeCheck,
+		Bell,
+		CreditCard,
+		LogOut,
+		Sparkles,
+	} from "@hugeicons/core-free-icons";
 	import { authClient } from "$lib/utils/auth";
-	import * as Avatar from "$lib/components/ui/avatar/index.js";
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
-	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-	import { useSidebar } from "$lib/components/ui/sidebar/index.js";
-	
+	import ModeToggle from "./mode-toggle.svelte";
+	import * as Avatar from "$lib/components/ui/avatar";
+	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+	import * as Sidebar from "$lib/components/ui/sidebar";
+	import { useSidebar } from "$lib/components/ui/sidebar";
+
 	import { goto } from "$app/navigation";
-	
-	let { user }: { user: { name: string; email: string; avatar?: string } } = $props();
+
+	let { user }: { user: { name: string; email: string; avatar?: string } } =
+		$props();
 	const sidebar = useSidebar();
 
 	async function logout() {
@@ -31,7 +39,11 @@
 						<Avatar.Root class="size-8 rounded-lg">
 							<Avatar.Image src={user.avatar} alt={user.name} />
 							<Avatar.Fallback class="rounded-lg">
-								{user.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "UN"}
+								{user.name
+									?.split(" ")
+									.map((n) => n[0])
+									.join("")
+									.toUpperCase() || "UN"}
 							</Avatar.Fallback>
 						</Avatar.Root>
 						<div class="grid flex-1 text-start text-sm leading-tight">
@@ -52,7 +64,11 @@
 						<Avatar.Root class="size-8">
 							<Avatar.Image src={user.avatar} alt={user.name} />
 							<Avatar.Fallback class="rounded-lg">
-								{user.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "UN"}
+								{user.name
+									?.split(" ")
+									.map((n) => n[0])
+									.join("")
+									.toUpperCase() || "UN"}
 							</Avatar.Fallback>
 						</Avatar.Root>
 						<div class="grid flex-1 text-start text-sm leading-tight">
@@ -82,6 +98,11 @@
 						<HugeiconsIcon icon={Bell} />
 						Notifications
 					</DropdownMenu.Item>
+					<DropdownMenu.Separator />
+					<div class="flex items-center justify-between gap-2 px-2 py-1.5	text-sm">
+						<span>Theme</span>
+						<ModeToggle />
+					</div>
 				</DropdownMenu.Group>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item onclick={logout}>

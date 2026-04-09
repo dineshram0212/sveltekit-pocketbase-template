@@ -8,12 +8,13 @@
 	import { userStore } from "$lib/stores/user.svelte";
 
 	let {
+		user: passedUser,
 		ref = $bindable(null),
 		collapsible = "icon",
 		...restProps
-	}: ComponentProps<typeof Sidebar.Root> = $props();
+	}: ComponentProps<typeof Sidebar.Root> & { user?: any } = $props();
 
-	const currentUser = $derived(userStore.user ?? user);
+	const currentUser = $derived(passedUser || userStore.user || user);
 </script>
 
 <Sidebar.Root bind:ref variant="floating" {...restProps}>

@@ -1,9 +1,9 @@
 import { Grid3x3 } from "@hugeicons/core-free-icons";
 
 export const user = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
+  name: "",
+  email: "",
+  avatar: "",
 }
 export const orgs = [
   {

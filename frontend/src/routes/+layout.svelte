@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import { ModeWatcher } from "mode-watcher";
 	import { pb } from '$lib/pb';
 	import { userStore } from '$lib/stores/user.svelte';
 	import { notificationStore } from '$lib/stores/notifications.svelte';
@@ -11,7 +12,7 @@
 	let { data, children }: { data: any, children: any } = $props();
 
 	// Update userStore if data.user changes (from server)
-	$effect(() => {
+	function syncUser() {
 		if (data.user) {
 			userStore.user = {
 				id: data.user.id,
@@ -19,13 +20,20 @@
 				name: data.user.name || data.user.username || 'User',
 				avatar: data.user.avatar ? pb.getFileUrl(data.user, data.user.avatar) : undefined
 			};
-			// Fetch notifications when user is logged in
 			if (browser) {
 				notificationStore.fetchNotifications();
 			}
 		} else {
 			userStore.user = null;
 		}
+	}
+
+	// Run once on initialization (SSR and Hydration)
+	syncUser();
+
+	// Run whenever data changes
+	$effect(() => {
+		syncUser();
 	});
 
 	if (browser) {
@@ -41,4 +49,5 @@
 <Toaster position="bottom-right" richColors />
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<ModeWatcher />
 {@render children()}
