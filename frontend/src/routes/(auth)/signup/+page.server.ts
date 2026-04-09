@@ -1,38 +1,41 @@
 import { fail, redirect } from "@sveltejs/kit";
-import { superValidate, message, type SuperValidated } from "sveltekit-superforms";
-import { zod } from "sveltekit-superforms/adapters";
-import { signupSchema, type SignupSchema } from "$lib/schemas/auth";
 
-export const load = async () => {
-  const form = await superValidate(zod(signupSchema as any)) as SuperValidated<SignupSchema>;
-  return { form };
+export const load = async ({ locals }) => {
+  if (locals.user) throw redirect(303, "/");
+  return {};
 };
 
 export const actions = {
   default: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(signupSchema as any)) as SuperValidated<SignupSchema>;
+    const data = await request.formData();
+    const email = data.get("email") as string;
+    const name = data.get("name") as string;
+    const password = data.get("password") as string;
+    const passwordConfirm = data.get("passwordConfirm") as string;
 
-    if (!form.valid) {
-      return fail(400, { form });
+    if (!email || !password || !name) {
+      return fail(400, { error: "Please fill in all fields" });
+    }
+
+    if (password !== passwordConfirm) {
+      return fail(400, { error: "Passwords do not match" });
     }
 
     try {
-      const data = {
-        username: form.data.email.split('@')[0] + Math.random().toString(36).substring(7),
-        email: form.data.email,
+      const userData = {
+        username: email.split('@')[0] + Math.random().toString(36).substring(7),
+        email: email,
         emailVisibility: true,
-        password: form.data.password,
-        passwordConfirm: form.data.passwordConfirm,
-        name: form.data.name,
+        password: password,
+        passwordConfirm: passwordConfirm,
+        name: name,
       };
 
-      await locals.pb.collection("users").create(data);
-      await locals.pb.collection("users").authWithPassword(form.data.email, form.data.password);
+      await locals.pb.collection("users").create(userData);
+      await locals.pb.collection("users").authWithPassword(email, password);
     } catch (err: any) {
       console.error("Signup error:", err);
-      return message(form, err.message || "Failed to create account", {
-        status: 400
-      });
+      return fail(400, { error: err.message || "Failed to create account" });
     }
 
     throw redirect(303, "/");

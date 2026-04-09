@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import { HugeiconsIcon } from "@hugeicons/svelte";
 	import {
 		ViewIcon,
@@ -10,26 +11,24 @@
 	import { authClient } from "$lib/utils/auth";
 	import { goto } from "$app/navigation";
 	import { notify } from "$lib/stores/notifications.svelte.js";
-	import { superForm } from "sveltekit-superforms";
-	import { zod } from "sveltekit-superforms/adapters";
-	import { loginSchema } from "$lib/schemas/auth";
-
-	import { onMount } from "svelte";
+	import { enhance } from "$app/forms";
 	import SEO from "$lib/components/SEO.svelte";
+	import type { ActionData } from "./$types";
 
-	let { data }: { data: any } = $props();
+	let { form }: { form: ActionData } = $props();
 
-	const { form, errors, enhance, delayed, message } = superForm(data.form, {
-		validators: zod(loginSchema as any),
-		onResult: ({ result }) => {
-			if (result.type === "redirect") {
-				notify.info("Welcome back!", "Signed in successfully");
-			}
+	let email = $state("");
+	let password = $state("");
+	let showPassword = $state(false);
+	let loading = $state(false);
+	let googleLoading = $state(false);
+
+	// Show toast on server-side error
+	$effect(() => {
+		if (form?.error) {
+			notify.alert("Login Failed", form.error);
 		}
 	});
-
-	let showPassword = $state(false);
-	let googleLoading = $state(false);
 
 	async function handleGoogleResponse(response: any) {
 		googleLoading = true;
@@ -77,7 +76,7 @@
 	<button
 		type="button"
 		onclick={loginWithGoogle}
-		disabled={$delayed || googleLoading}
+		disabled={loading || googleLoading}
 		class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-background/60 disabled:cursor-not-allowed disabled:opacity-60"
 	>
 		<img src={google} alt="Google" class="h-4 w-4" />
@@ -97,7 +96,13 @@
 	</div>
 
 	<form
-		use:enhance
+		use:enhance={() => {
+			loading = true;
+			return async ({ update }) => {
+				await update();
+				loading = false;
+			};
+		}}
 		method="POST"
 		class="space-y-5"
 	>
@@ -113,15 +118,15 @@
 					name="email"
 					type="email"
 					autocomplete="email"
-					bind:value={$form.email}
+					bind:value={email}
 					placeholder="name@example.com"
 					class="flex-1 border-none bg-transparent px-3 py-1.5 text-[13px] text-foreground outline-none focus:ring-0 placeholder:text-muted-foreground"
-					disabled={$delayed || googleLoading}
+					disabled={loading || googleLoading}
 					required
 				/>
 			</div>
-			{#if $errors.email}
-				<p class="mt-1 text-xs text-red-500">{$errors.email}</p>
+			{#if form?.error && !email}
+				<p class="mt-1 text-xs text-red-500">Email is required</p>
 			{/if}
 		</div>
 
@@ -145,17 +150,17 @@
 					name="password"
 					type={showPassword ? "text" : "password"}
 					autocomplete="current-password"
-					bind:value={$form.password}
+					bind:value={password}
 					placeholder="Enter your password"
 					class="flex-1 border-none bg-transparent px-3 py-1.5 text-[13px] text-foreground outline-none focus:ring-0 placeholder:text-muted-foreground"
-					disabled={$delayed || googleLoading}
+					disabled={loading || googleLoading}
 					required
 				/>
 				<button
 					type="button"
 					onclick={() => (showPassword = !showPassword)}
 					class="mr-1 cursor-pointer text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
-					disabled={$delayed || googleLoading}
+					disabled={loading || googleLoading}
 					aria-label={showPassword ? "Hide password" : "Show password"}
 				>
 					{#if showPassword}
@@ -165,17 +170,17 @@
 					{/if}
 				</button>
 			</div>
-			{#if $errors.password}
-				<p class="mt-1 text-xs text-red-500">{$errors.password}</p>
+			{#if form?.error && password.length < 8}
+				<p class="mt-1 text-xs text-red-500">Password must be at least 8 characters</p>
 			{/if}
 		</div>
 
 		<button
 			type="submit"
-			disabled={$delayed || googleLoading}
+			disabled={loading || googleLoading}
 			class="flex w-full cursor-pointer items-center justify-center rounded-full bg-foreground px-4 py-3 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
 		>
-			{#if $delayed}
+			{#if loading}
 				<HugeiconsIcon
 					icon={Loading03Icon}
 					size={18}
@@ -199,9 +204,9 @@
 
 	<div
 		class="pointer-events-none absolute right-0 bottom-0 left-0 flex h-4 items-center justify-center gap-1 overflow-hidden text-center text-xs text-red-600 transition-opacity"
-		class:opacity-0={!$message}
+		class:opacity-0={!form?.error}
 	>
 		<HugeiconsIcon icon={InformationCircleIcon} size={14} />
-		<span class="truncate">{$message ?? ""}</span>
+		<span class="truncate">{form?.error ?? ""}</span>
 	</div>
 </div>

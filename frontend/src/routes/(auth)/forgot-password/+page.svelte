@@ -15,7 +15,6 @@
 
 		const { error: resetError } = await authClient.forgetPassword({
 			email,
-			redirectTo: "/reset-password",
 		});
 
 		if (resetError) {
